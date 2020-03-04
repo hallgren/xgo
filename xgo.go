@@ -49,6 +49,7 @@ var (
 	srcPackage  = flag.String("pkg", "", "Sub-package to build if not root import")
 	srcRemote   = flag.String("remote", "", "Version control remote repository to build")
 	srcBranch   = flag.String("branch", "", "Version control branch to build")
+	srcTag      = flag.String("tag", "", "Version control tag to build")
 	outPrefix   = flag.String("out", "", "Prefix to use for output naming (empty = package name)")
 	outFolder   = flag.String("dest", "", "Destination folder to put binaries in (empty = current)")
 	crossDeps   = flag.String("deps", "", "CGO dependencies (configure/make based archives)")
@@ -64,6 +65,7 @@ type ConfigFlags struct {
 	Prefix       string   // Prefix to use for output naming
 	Remote       string   // Version control remote repository to build
 	Branch       string   // Version control branch to build
+	Tag          string   // Version control tag to build
 	Dependencies string   // CGO dependencies (configure/make based archives)
 	Arguments    string   // CGO dependency configure arguments
 	Targets      []string // Targets to build for
@@ -171,6 +173,7 @@ func main() {
 		Package:      *srcPackage,
 		Remote:       *srcRemote,
 		Branch:       *srcBranch,
+		Tag:          *srcTag,
 		Prefix:       *outPrefix,
 		Dependencies: *crossDeps,
 		Arguments:    *crossArgs,
@@ -195,6 +198,7 @@ func main() {
 			log.Fatalf("Failed to resolve destination path (%s): %v.", *outFolder, err)
 		}
 	}
+	fmt.Println(config)
 	// Execute the cross compilation, either in a container or the current system
 	if !xgoInXgo {
 		err = compile(image, config, flags, folder)
@@ -316,6 +320,7 @@ func compile(image string, config *ConfigFlags, flags *BuildFlags, folder string
 		"-v", depsCache + ":/deps-cache:ro",
 		"-e", "REPO_REMOTE=" + config.Remote,
 		"-e", "REPO_BRANCH=" + config.Branch,
+		"-e", "REPO_TAG=" + config.Tag,
 		"-e", "PACK=" + config.Package,
 		"-e", "DEPS=" + config.Dependencies,
 		"-e", "ARGS=" + config.Arguments,
@@ -375,6 +380,7 @@ func compileContained(config *ConfigFlags, flags *BuildFlags, folder string) err
 	env := []string{
 		"REPO_REMOTE=" + config.Remote,
 		"REPO_BRANCH=" + config.Branch,
+		"REPO_TAG=" + config.Tag,
 		"PACK=" + config.Package,
 		"DEPS=" + config.Dependencies,
 		"ARGS=" + config.Arguments,

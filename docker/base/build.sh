@@ -91,7 +91,10 @@ else
   cd $GOPATH_ROOT/$1
 
   # Switch over the code-base to another checkout if requested
-  if [ "$REPO_REMOTE" != "" ] || [ "$REPO_BRANCH" != "" ]; then
+  if [ "$REPO_REMOTE" != "" ] || [ "$REPO_BRANCH" != "" ] || [ "$REPO_TAG" != "" ]; then
+    echo "here!!!"
+    echo $REPO_TAG
+    echo "...."
     # Detect the version control system type
     IMPORT_PATH=$1
     while [ "$IMPORT_PATH" != "." ] && [ "$REPO_TYPE" == "" ]; do
@@ -127,6 +130,13 @@ else
         git clean -dxf
       elif [ "$REPO_TYPE" == "hg" ]; then
         hg checkout $REPO_BRANCH
+      fi
+    fi
+    if [ "$REPO_TAG" != "" ]; then
+      echo "Switching over to tag $REPO_TAG..."
+      if [ "$REPO_TYPE" == "git" ]; then
+        git checkout $REPO_TAG -b latest
+        git clean -dxf
       fi
     fi
   fi
